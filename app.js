@@ -22,6 +22,7 @@ app.use(express.json())
 
 // Routes
 app.use(require('./routes/user_route'))
+app.use(require('./routes/account_route'))
 
 const PORT = process.env.PORT || 3000
 
