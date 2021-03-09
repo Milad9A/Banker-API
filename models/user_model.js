@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema(
             minlength: 7,
             trim: true,
         },
+        balance: {
+            type: Number,
+            default: 0,
+        },
         tokens: [
             {
                 token: {
@@ -41,22 +45,16 @@ const userSchema = new mongoose.Schema(
     }
 )
 
-userSchema.virtual('accounts', {
-    ref: 'Account',
-    localField: '_id',
-    foreignField: 'user_id',
-})
-
 userSchema.virtual('payments', {
     ref: 'Payment',
     localField: '_id',
-    foreignField: 'user_id',
+    foreignField: 'user',
 })
 
 userSchema.virtual('transactions', {
     ref: 'Transaction',
     localField: '_id',
-    foreignField: 'user_id',
+    foreignField: 'user',
 })
 
 userSchema.methods.toJSON = function () {

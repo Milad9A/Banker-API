@@ -5,24 +5,18 @@ const auth = require('../middleware/auth')
 const router = new express.Router()
 
 router.post(
-    '/accounts/:id/transactions/withdrawal',
+    '/transactions/withdrawal',
     auth,
     TransactionController.createWithdrawalTransaction
 )
 
 router.post(
-    '/accounts/:id/transactions/deposit',
+    '/transactions/deposit',
     auth,
     TransactionController.createDepositTransaction
 )
 
 router.get('/transactions', auth, TransactionController.getMyTransactions)
-
-router.get(
-    '/accounts/:id/transactions',
-    auth,
-    TransactionController.getMyAccountTransactions
-)
 
 router.get('/transactions/:id', auth, TransactionController.getMyTransaction)
 

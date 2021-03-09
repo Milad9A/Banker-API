@@ -1,4 +1,3 @@
-const Account = require('../models/account_model')
 const Transaction = require('../models/transaction_model')
 
 const TransactionController = {
@@ -6,22 +5,21 @@ const TransactionController = {
         const transaction = new Transaction({
             ...req.body,
             type: 'withdrawal',
-            user_id: req.user._id,
-            account_id: req.params.id,
+            user: req.user._id,
         })
 
-        const account = await Account.findById(req.params.id)
-
-        if (transaction.amount > account.balance)
+        if (transaction.amount > req.user.balance)
             return res.status(402).send({
                 error:
                     'Insufficient funds. Unable to complete the withdrawal process',
             })
-        else account.balance -= transaction.amount
+        else req.user.balance -= transaction.amount
 
         try {
             await transaction.save()
-            await account.save()
+            await req.user.save()
+
+            await transaction.populate('user').execPopulate()
 
             res.status(201).send(transaction)
         } catch (error) {
@@ -33,17 +31,16 @@ const TransactionController = {
         const transaction = new Transaction({
             ...req.body,
             type: 'deposit',
-            user_id: req.user._id,
-            account_id: req.params.id,
+            user: req.user._id,
         })
 
-        const account = await Account.findById(req.params.id)
-
-        account.balance += transaction.amount
+        req.user.balance += transaction.amount
 
         try {
             await transaction.save()
-            await account.save()
+            await req.user.save()
+
+            await transaction.populate('user').execPopulate()
 
             res.status(201).send(transaction)
         } catch (error) {
@@ -53,25 +50,15 @@ const TransactionController = {
 
     getMyTransactions: async (req, res) => {
         try {
-            await req.user.populate('transactions').execPopulate()
-            res.send(req.user.transactions)
-        } catch (error) {
-            res.status(400).send(error)
-        }
-    },
-
-    getMyAccountTransactions: async (req, res) => {
-        try {
             await req.user
                 .populate({
                     path: 'transactions',
-                    match: { account_id: req.params.id },
+                    populate: {
+                        path: 'user',
+                    },
                 })
                 .execPopulate()
-
-            const transactions = req.user.transactions
-
-            res.send(transactions)
+            res.send(req.user.transactions)
         } catch (error) {
             res.status(400).send(error)
         }
@@ -82,10 +69,12 @@ const TransactionController = {
         try {
             const transaction = await Transaction.findOne({
                 _id,
-                user_id: req.user._id,
+                user: req.user._id,
             })
 
             if (!transaction) return res.status(404).send()
+
+            await transaction.populate('user').execPopulate()
 
             res.send(transaction)
         } catch (error) {

@@ -2,15 +2,10 @@ const mongoose = require('mongoose')
 
 const transactionSchema = new mongoose.Schema(
     {
-        user_id: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref: 'User',
-        },
-        account_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: 'Account',
         },
         amount: {
             type: Number,
