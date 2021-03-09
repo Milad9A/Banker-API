@@ -11,13 +11,14 @@ const PaymentController = {
 
         const account = await Account.findById(req.params.id)
 
-        try {
-            if (payment.amount > account.balance)
-                return res.status(402).send({
-                    error: 'Insufficient funds',
-                })
-            else account.balance -= payment.amount
+        if (payment.amount > account.balance)
+            return res.status(402).send({
+                error:
+                    'Insufficient funds. Unable to complete the payment process',
+            })
+        else account.balance -= payment.amount
 
+        try {
             await payment.save()
             await account.save()
 
@@ -39,7 +40,6 @@ const PaymentController = {
     getMyAccountPayments: async (req, res) => {
         try {
             await req.user
-
                 .populate({
                     path: 'payments',
                     match: { account_id: req.params.id },

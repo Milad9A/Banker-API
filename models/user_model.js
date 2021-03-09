@@ -53,6 +53,12 @@ userSchema.virtual('payments', {
     foreignField: 'user_id',
 })
 
+userSchema.virtual('transactions', {
+    ref: 'Transaction',
+    localField: '_id',
+    foreignField: 'user_id',
+})
+
 userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject()
