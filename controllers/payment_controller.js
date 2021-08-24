@@ -9,8 +9,7 @@ const PaymentController = {
 
         if (payment.amount > req.user.balance)
             return res.status(402).send({
-                error:
-                    'Insufficient funds. Unable to complete the payment process',
+                error: 'Insufficient funds. Unable to complete the payment process',
             })
         else req.user.balance -= payment.amount
 
@@ -31,8 +30,14 @@ const PaymentController = {
             await req.user
                 .populate({ path: 'payments', populate: { path: 'user' } })
                 .execPopulate()
+
+            req.user.payments = req.user.payments.sort(
+                (a, b) => b.createdAt - a.createdAt
+            )
+
             res.send(req.user.payments)
         } catch (error) {
+            console.log(error)
             res.status(400).send(error)
         }
     },
